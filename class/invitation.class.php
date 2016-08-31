@@ -25,6 +25,27 @@ class TInvitation extends TObjetStd {
 
 	}
 	
+	function libStatut() {
+		
+		return $this->TStatut[$this->statut];
+		
+	}
+	
+	static function addUser(&$PDOdb,$fk_action, &$TUser, $default_statut= 0) {
+		
+		foreach($TUser as $fk_user) {
+			
+			$i=new TInvitation;
+			$i->fk_user = $fk_user;
+			$i->fk_action = $fk_action ;
+			$i->statut = $default_statut;
+			
+			$i->save($PDOdb);
+			
+		}
+		
+	}
+	
 	static function getAllForAction(&$PDOdb, $fk_action) {
 		
 		$Tab = $PDOdb->ExecuteAsArray("SELECT rowid FROM ".MAIN_DB_PREFIX."invitation WHERE fk_action=".$fk_action);
