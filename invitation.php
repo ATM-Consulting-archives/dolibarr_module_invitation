@@ -16,6 +16,19 @@
 	$PDOdb=new TPDOdb;
 
 	switch($action) {
+		
+		case 'setStatut':
+		
+			$invitation=new TInvitation;
+			if($invitation->load($PDOdb, GETPOST('id'))) {
+				$invitation->statut = GETPOST('statut');
+				$invitation->save($PDOdb);
+				
+			}
+			//setEventMessage($langs->trans('InvitationStatutChanged'));
+			break;
+		
+			break;
 		case 'deleteinvitation':
 			
 			$invitation=new TInvitation;
@@ -123,7 +136,16 @@ function _list($object){
 		$u->fetch($inv->fk_user);
 		
 		echo '<tr><td>'.$u->getNomUrl(1).'</td>
-			<td>'.$inv->libStatut().'</td>
+			<td>'.$inv->libStatut(true);
+		
+		if($inv->statut!=0) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=0">'.img_picto($langs->trans('SetStatutInvitation0'), 'stcomm0.png').'</a>';
+		if($inv->statut!=1) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=1">'.img_picto($langs->trans('SetStatutInvitation1'), 'stcomm2.png').'</a>';
+		if($inv->statut!=2) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=2">'.img_picto($langs->trans('SetStatutInvitation2'), 'stcomm1.png').'</a>';
+		if($inv->statut!=3) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=3">'.img_picto($langs->trans('SetStatutInvitation3'), 'warning.png').'</a>';
+		if($inv->statut!=4) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=4">'.img_picto($langs->trans('SetStatutInvitation4'), 'stcomm3.png').'</a>';
+			
+			
+		echo '</td>
 			<td><a href="?fk_action='.$object->id.'&action=deleteinvitation&id='.$inv->getId().'">'.img_delete().'</a></td>
 		</tr>';
 	}

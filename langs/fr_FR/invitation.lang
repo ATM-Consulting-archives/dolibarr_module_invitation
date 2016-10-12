@@ -13,3 +13,18 @@ CreateBillPresent=Facturer uniquement les présents
 
 RemovePendingInvitationDone=Invités non confirmés supprimés
 RemoveInvitationDone=Invitation supprimée
+InvitationStatutChanged=Statut de l'invitation mis à jour
+
+PendingInvitation=Pas encore de réponse
+InvitationConfirmed=Venue Confirmée
+InvitationWontCome=Ne viendra pas
+InvitationWasntPresent=N'est pas venu
+InvitationPresent=Présent
+
+SetStatutInvitation0=Mettre au statut en attente de réponse
+SetStatutInvitation1=Mettre au statut viendra
+SetStatutInvitation2=Mettre au statut ne viendra pas
+SetStatutInvitation3=Mettre au statut n'est pas venu alors qu'il avait validé sa présence
+SetStatutInvitation4=Mettre au statut était bien présent
+
+AddUserOrGroupUser=Ajouter un membre ou un groupe

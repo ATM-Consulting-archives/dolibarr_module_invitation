@@ -17,18 +17,28 @@ class TInvitation extends TObjetStd {
 
 		$this->TStatut=array(
 			0=>$langs->trans('PendingInvitation')
-			,1=>$langs->trans('Confirmed')
-			,2=>$langs->trans('WontCome')
-			,3=>$langs->trans('WasntPresent')
-			,4=>$langs->trans('Present')
+			,1=>$langs->trans('InvitationConfirmed')
+			,2=>$langs->trans('InvitationWontCome')
+			,3=>$langs->trans('InvitationWasntPresent')
+			,4=>$langs->trans('InvitationPresent')
 		);
 
 	}
 	
 	function libStatut() {
 		
-		return $this->TStatut[$this->statut];
+		$r =  $this->TStatut[$this->statut];
 		
+		return $r;
+	}
+	
+	function loadByUserAction(&$PDOdb, $fk_user,$fk_action) {
+		
+		$PDOdb->Execute("SELECT rowid FROM ".$this->get_table()." WHERE fk_action=".$fk_action." AND fk_user=".$fk_user);
+		if($obj = $PDOdb->Get_line()) {
+			return $this->load($PDOdb, $obj->rowid);
+		}
+		return false;
 	}
 	
 	static function addUser(&$PDOdb,$fk_action, &$TUser, $default_statut= 0) {
@@ -36,11 +46,16 @@ class TInvitation extends TObjetStd {
 		foreach($TUser as $fk_user) {
 			
 			$i=new TInvitation;
-			$i->fk_user = $fk_user;
-			$i->fk_action = $fk_action ;
-			$i->statut = $default_statut;
 			
-			$i->save($PDOdb);
+			if(!$i->loadByUserAction($PDOdb, $fk_user,$fk_action)) {
+				$i->fk_user = $fk_user;
+				$i->fk_action = $fk_action ;
+				$i->statut = $default_statut;
+				
+				$i->save($PDOdb);
+				
+			}
+			
 			
 		}
 		
