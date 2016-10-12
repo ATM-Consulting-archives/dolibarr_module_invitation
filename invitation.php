@@ -30,8 +30,7 @@
 		
 			$invitation=new TInvitation;
 			if($invitation->load($PDOdb, GETPOST('id'))) {
-				$invitation->statut = GETPOST('statut');
-				$invitation->save($PDOdb);
+				$invitation->setStatut($PDOdb, GETPOST('statut'));
 				
 			}
 			//setEventMessage($langs->trans('InvitationStatutChanged'));
