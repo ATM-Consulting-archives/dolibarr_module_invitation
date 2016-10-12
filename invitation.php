@@ -16,6 +16,20 @@
 	$PDOdb=new TPDOdb;
 
 	switch($action) {
+		case 'deleteinvitation':
+			
+			$invitation=new TInvitation;
+			if($invitation->load($PDOdb, GETPOST('id'))) {
+				$invitation->delete($PDOdb);
+				
+			}
+			setEventMessage($langs->trans('RemoveInvitationDone'));
+			break;
+		case 'remove_pending':
+			TInvitation::removePending($PDOdb, $fk_object);
+			setEventMessage($langs->trans('RemovePendingInvitationDone'));
+			
+			break;
 		
 		case 'adduser':
 			
@@ -23,8 +37,8 @@
 			$fk_user = (int)GETPOST('fk_user');
 			$fk_usergroup = (int)GETPOST('fk_usergroup');
 			
-			if(!empty($fk_user))$TUser[] = $fk_user;
-			if(!empty($fk_usergroup)) {
+			if($fk_user>0)$TUser[] = $fk_user;
+			if($fk_usergroup>0) {
 				
 				$g=new UserGroup($db);
 				if($g->fetch($fk_usergroup)>0) {
@@ -69,8 +83,8 @@ function _card(&$object) {
 	
 	echo '<br /><table class="border" width="100%">';
 	echo '<tr><td width="30%">'.$langs->trans("AddUserOrGroupUser").'</td><td>';
-	echo $form->select_dolusers(-1,'fk_user');
-	echo $form->select_dolgroups(-1,'fk_usergroup');
+	echo $form->select_dolusers(-1,'fk_user',1);
+	echo $form->select_dolgroups(-1,'fk_usergroup',1);
 	echo '</td><td>'.$formCore->btsubmit($langs->trans('Add'), 'bt_add').'</td></tr>';
 	echo '</table>';
 	
@@ -79,9 +93,10 @@ function _card(&$object) {
 	_list($object);
 	
 	echo '<div class="tabsAction">
-		<a class="butAction">'.$langs->trans('SendInvitationTouser').'</a>
-		<a class="butAction">'.$langs->trans('CreateBillConfirmed').'</a>
-		<a class="butAction">'.$langs->trans('CreateBillPresent').'</a>
+		<a class="butActionDelete" href="?fk_action='.$object->id.'&action=remove_pending">'.$langs->trans('RemoveAllUserInvitationPending').'</a>
+		<a class="butAction" href="?fk_action='.$object->id.'&action=send_mail">'.$langs->trans('SendInvitationTouser').'</a>
+		<a class="butAction" href="?fk_action='.$object->id.'&action=create_bill">'.$langs->trans('CreateBillConfirmed').'</a>
+		<a class="butAction" href="?fk_action='.$object->id.'&action=create_bill&type=present">'.$langs->trans('CreateBillPresent').'</a>
 	</div>';
 	
 	

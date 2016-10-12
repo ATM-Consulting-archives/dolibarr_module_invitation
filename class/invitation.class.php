@@ -46,6 +46,10 @@ class TInvitation extends TObjetStd {
 		
 	}
 	
+	static function removePending(&$PDOdb, $fk_action) {
+		$PDOdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."invitation WHERE fk_action=".$fk_action." AND statut=0");
+	}
+	
 	static function getAllForAction(&$PDOdb, $fk_action) {
 		
 		$Tab = $PDOdb->ExecuteAsArray("SELECT rowid FROM ".MAIN_DB_PREFIX."invitation WHERE fk_action=".$fk_action);

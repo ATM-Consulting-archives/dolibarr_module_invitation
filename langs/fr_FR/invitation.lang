@@ -5,3 +5,11 @@ ATMAbout = Ce module a été développé par <a href="http://www.atm-consulting.
 
 InvitationSetup = Configuration du module Invitation
 InvitationAbout = A propos du module Invitation
+
+RemoveAllUserInvitationPending=Supprimer les non confirmés
+SendInvitationTouser=Envoyer l'invitation par mail
+CreateBillConfirmed=Facturer ceux qui ont confimé
+CreateBillPresent=Facturer uniquement les présents
+
+RemovePendingInvitationDone=Invités non confirmés supprimés
+RemoveInvitationDone=Invitation supprimée
