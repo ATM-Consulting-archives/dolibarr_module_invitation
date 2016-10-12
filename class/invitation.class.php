@@ -25,7 +25,7 @@ class TInvitation extends TObjetStd {
 
 		$this->user=new stdClass;
 	}
-	function setStatut($statut) {
+	function setStatut($PDOdb, $statut) {
 		$this->statut = $statut;
 		$this->save($PDOdb);
 		

@@ -7,6 +7,8 @@
     dol_include_once('/comm/action/class/actioncomm.class.php');
 	dol_include_once('/user/class/usergroup.class.php');
 	
+	$langs->load('invitation@invitation');
+	
 	$action = GETPOST('action');
 	$fk_object = GETPOST('fk_action');
 	
@@ -15,21 +17,21 @@
 
 	$PDOdb=new TPDOdb;
 
-	 
-
+	$fk_user_author = $object->author->id;
+	$admin_right = ($fk_user_author == $user->id);
+	
 	switch($action) {
 		
 		case 'send':
 			
-			
-			_action_send($object,$action);
+			if($admin_right) _action_send($object,$action);
 					
 			break;
 		
 		case 'setStatut':
 		
 			$invitation=new TInvitation;
-			if($invitation->load($PDOdb, GETPOST('id'))) {
+			if($invitation->load($PDOdb, GETPOST('id')) && ($admin_right || $invitation->fk_user = $user->id)) {
 				$invitation->setStatut($PDOdb, GETPOST('statut'));
 				
 			}
@@ -40,51 +42,52 @@
 		case 'deleteinvitation':
 			
 			$invitation=new TInvitation;
-			if($invitation->load($PDOdb, GETPOST('id'))) {
+			if($invitation->load($PDOdb, GETPOST('id')) && ($admin_right || $invitation->fk_user = $user->id)) {
 				$invitation->delete($PDOdb);
 				
 			}
 			setEventMessage($langs->trans('RemoveInvitationDone'));
 			break;
 		case 'remove_pending':
-			TInvitation::removePending($PDOdb, $fk_object);
-			setEventMessage($langs->trans('RemovePendingInvitationDone'));
-			
+			if($admin_right) {
+				TInvitation::removePending($PDOdb, $fk_object);
+				setEventMessage($langs->trans('RemovePendingInvitationDone'));
+			}
 			break;
 		
 		case 'adduser':
-			
-			$TUser = array();
-			$fk_user = (int)GETPOST('fk_user');
-			$fk_usergroup = (int)GETPOST('fk_usergroup');
-			
-			if($fk_user>0)$TUser[] = $fk_user;
-			if($fk_usergroup>0) {
+			if($admin_right) {
+				$TUser = array();
+				$fk_user = (int)GETPOST('fk_user');
+				$fk_usergroup = (int)GETPOST('fk_usergroup');
 				
-				$g=new UserGroup($db);
-				if($g->fetch($fk_usergroup)>0) {
+				if($fk_user>0)$TUser[] = $fk_user;
+				if($fk_usergroup>0) {
 					
-					$Tab = $g->listUsersForGroup();
-					foreach($Tab as &$user) {
-						if($user->statut>0) {
-							$TUser[] = $user->id;							
+					$g=new UserGroup($db);
+					if($g->fetch($fk_usergroup)>0) {
+						
+						$Tab = $g->listUsersForGroup();
+						foreach($Tab as &$user) {
+							if($user->statut>0) {
+								$TUser[] = $user->id;							
+							}
 						}
+						
 					}
 					
 				}
 				
+				TInvitation::addUser($PDOdb, $fk_object, $TUser);
+				
+				setEventMessage($langs->trans('UserAdded'));
 			}
-			
-			TInvitation::addUser($PDOdb, $fk_object, $TUser);
-			
-			setEventMessage($langs->trans('UserAdded'));
-			
 			break;
 		
 	}
 
 
-	_card($PDOdb, $object,$action);
+	_card($PDOdb, $object,$action,$fk_user_author);
 
 function _action_send(&$object,$action) {
 	global $db,$langs,$conf,$user,$mysoc;
@@ -301,7 +304,7 @@ function _action_send(&$object,$action) {
 					}
 				}
 	
-				// Send mail
+				// Send mailInvitation
 				require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 				$mailfile = new CMailFile($subject,$sendto,$from,$message,$filepath,$mimetype,$filename,$sendtocc,$sendtobcc,$deliveryreceipt,-1,'','',$trackid);
 				if ($mailfile->error)
@@ -416,6 +419,9 @@ function _action_send(&$object,$action) {
 function _card(&$PDOdb,&$object,$action) {
 	global $langs, $user, $conf, $db;
 	
+	$fk_user_author = $object->author->id;
+	$admin_right = ($fk_user_author == $user->id);
+	
 	llxHeader('',$langs->trans('Invitations'));
 	
     $head = actions_prepare_head($object);
@@ -424,22 +430,28 @@ function _card(&$PDOdb,&$object,$action) {
 	
 	$form = new Form($db);
 	
-	$formCore=new TFormCore('auto','formInvit', 'post');
-	echo $formCore->hidden('action', 'adduser');
-	echo $formCore->hidden('fk_action', $object->id);
-	
-	echo '<br /><table class="border" width="100%">';
-	echo '<tr><td width="30%">'.$langs->trans("AddUserOrGroupUser").'</td><td>';
-	echo $form->select_dolusers(-1,'fk_user',1);
-	echo $form->select_dolgroups(-1,'fk_usergroup',1);
-	echo '</td><td>'.$formCore->btsubmit($langs->trans('Add'), 'bt_add').'</td></tr>';
-	echo '</table>';
-	
-	$formCore->end();
+	if($admin_right) {
+		$formCore=new TFormCore('auto','formInvit', 'post');
+		echo $formCore->hidden('action', 'adduser');
+		echo $formCore->hidden('fk_action', $object->id);
+		
+		
+		echo '<br /><table class="border" width="100%">';
+		echo '<tr><td width="30%">'.$langs->trans("AddUserOrGroupUser").'</td><td>';
+		echo $form->select_dolusers(-1,'fk_user',1);
+		echo $form->select_dolgroups(-1,'fk_usergroup',1);
+		echo '</td><td>'.$formCore->btsubmit($langs->trans('Add'), 'bt_add').'</td></tr>';
+		echo '</table>';
+		
+		$formCore->end();
+	}
 	
 	_list($PDOdb, $object);
 	
-	if ($action == 'presend')
+	if(!$admin_right) {
+		null;
+	}
+	else if ($action == 'presend')
 	{
 	
 		$ref = dol_sanitizeFileName($object->ref);
@@ -511,8 +523,9 @@ function _card(&$PDOdb,&$object,$action) {
 				$formmail->substit['__CONTACTCIVNAME__'] = $custcontact;
 			}
 		}
+		$link_event = dol_buildpath('/invitation/invitation.php?fk_action=39',1);
 
-		$formmail->withbody = $object->note;
+		$formmail->withbody = $object->note.' <br />'. $langs->trans('ViewInvitation').' <a href="'.$link_event.'">'.$link_event.'</a>';
 
 		// Tableau des parametres complementaires
 		$formmail->param['action'] = 'send';
@@ -549,6 +562,8 @@ function _card(&$PDOdb,&$object,$action) {
 	
 function _list(&$PDOdb, $object){
 	global $conf,$user,$db,$langs,$form;
+	$fk_user_author = $object->author->id;
+	$admin_right = ($fk_user_author == $user->id);
 	
 	$PDOdb=new TPDOdb;
 	
@@ -563,18 +578,21 @@ function _list(&$PDOdb, $object){
 		$u=new User($db);
 		$u->fetch($inv->fk_user);
 		
-		echo '<tr><td>'.$u->getNomUrl(1).'</td>
+		echo '<tr><td>'.($admin_right ? $u->getNomUrl(1) : $u->getFullName($langs)).'</td>
 			<td>'.$inv->libStatut(true);
 		
-		if($inv->statut!=0) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=0">'.img_picto($langs->trans('SetStatutInvitation0'), 'stcomm0.png').'</a>';
-		if($inv->statut!=1) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=1">'.img_picto($langs->trans('SetStatutInvitation1'), 'stcomm2.png').'</a>';
-		if($inv->statut!=2) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=2">'.img_picto($langs->trans('SetStatutInvitation2'), 'stcomm1.png').'</a>';
-		if($inv->statut!=3) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=3">'.img_picto($langs->trans('SetStatutInvitation3'), 'warning.png').'</a>';
-		if($inv->statut!=4) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=4">'.img_picto($langs->trans('SetStatutInvitation4'), 'stcomm3.png').'</a>';
-			
+			if($admin_right || $inv->fk_user == $user->id) {
+		
+				if($inv->statut!=0 && $admin_right) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=0">'.img_picto($langs->trans('SetStatutInvitation0'), 'stcomm0.png').'</a>';
+				if($inv->statut!=1) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=1">'.img_picto($langs->trans('SetStatutInvitation1'), 'stcomm2.png').'</a>';
+				if($inv->statut!=2) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=2">'.img_picto($langs->trans('SetStatutInvitation2'), 'stcomm1.png').'</a>';
+				if($inv->statut!=3 && $admin_right) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=3">'.img_picto($langs->trans('SetStatutInvitation3'), 'warning.png').'</a>';
+				if($inv->statut!=4 && $admin_right) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=4">'.img_picto($langs->trans('SetStatutInvitation4'), 'stcomm3.png').'</a>';
+					
+			}
 			
 		echo '</td>
-			<td><a href="?fk_action='.$object->id.'&action=deleteinvitation&id='.$inv->getId().'">'.img_delete().'</a></td>
+			<td>'.($admin_right ? '<a href="?fk_action='.$object->id.'&action=deleteinvitation&id='.$inv->getId().'">'.img_delete().'</a>' : '') .'</td>
 		</tr>';
 	}
 	
