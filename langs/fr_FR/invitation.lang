@@ -15,6 +15,8 @@ RemovePendingInvitationDone=Invités non confirmés supprimés
 RemoveInvitationDone=Invitation supprimée
 InvitationStatutChanged=Statut de l'invitation mis à jour
 
+UserAdded=Personne ajoutée
+
 PendingInvitation=Pas encore de réponse
 InvitationConfirmed=Venue Confirmée
 InvitationWontCome=Ne viendra pas
@@ -28,3 +30,4 @@ SetStatutInvitation3=Mettre au statut n'est pas venu alors qu'il avait validé s
 SetStatutInvitation4=Mettre au statut était bien présent
 
 AddUserOrGroupUser=Ajouter un membre ou un groupe
+SendInvitationByMail=Envoyer l'invitation par mail aux membres non confirmés

@@ -23,6 +23,7 @@ class TInvitation extends TObjetStd {
 			,4=>$langs->trans('InvitationPresent')
 		);
 
+		$this->user=new stdClass;
 	}
 	
 	function libStatut() {
@@ -39,6 +40,14 @@ class TInvitation extends TObjetStd {
 			return $this->load($PDOdb, $obj->rowid);
 		}
 		return false;
+	}
+	
+	function load_user() {
+		global $db,$conf,$langs;
+		
+		$this->user=new User($db);
+		return $this->user->fetch($this->fk_user);
+		
 	}
 	
 	static function addUser(&$PDOdb,$fk_action, &$TUser, $default_statut= 0) {
@@ -63,6 +72,24 @@ class TInvitation extends TObjetStd {
 	
 	static function removePending(&$PDOdb, $fk_action) {
 		$PDOdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."invitation WHERE fk_action=".$fk_action." AND statut=0");
+	}
+	
+	static function getPending(&$PDOdb, $fk_action, $loadUser=false) {
+		$Tab = $PDOdb->ExecuteAsArray("SELECT rowid FROM ".MAIN_DB_PREFIX."invitation WHERE fk_action=".$fk_action." AND statut=0");
+		
+		$TInvitation=array();
+		foreach($Tab as $row) {
+			$i=new TInvitation;
+			$i->load($PDOdb, $row->rowid);
+			
+			if($loadUser) {
+				$i->load_user();
+			}
+			
+			$TInvitation[] = $i;
+			
+		}
+		return $TInvitation;		
 	}
 	
 	static function getAllForAction(&$PDOdb, $fk_action) {
