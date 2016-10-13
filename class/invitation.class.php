@@ -24,19 +24,29 @@ class TInvitation extends TObjetStd {
 		);
 
 		$this->user=new stdClass;
+		$this->user=new stdClass;
 	}
 	function setStatut($PDOdb, $statut) {
+		
+		global $user,$db,$langs,$conf;
+		
 		$this->statut = $statut;
 		$this->save($PDOdb);
 		
-		$this->load_action();
-		
-		
-		if($this->statut == 0 || $this->statut == 2 || $this->statut == 3) {
+		if($this->load_action()>0) {
+			$this->action->fetch_userassigned();
 			
-		}
-		else {
+			if(($this->statut == 0 || $this->statut == 2 || $this->statut == 3)
+				&& !empty($this->action->userassigned[$this->fk_user])) {
+				
+				unset($this->action->userassigned[$this->fk_user]);
+					
+			}
+			elseif(empty($this->action->userassigned[$this->fk_user])) {
+				$this->action->userassigned[$this->fk_user] = array('id'=>$this->fk_user, 'mandatory'=>1, 'transparency'=>0);
+			}
 			
+			$this->action->update($user);
 		}
 		
 		
@@ -60,8 +70,8 @@ class TInvitation extends TObjetStd {
 	function load_action() {
 		global $db,$user,$conf,$langs;
 		dol_include_once('/comm/action/class/actioncomm.class.php');
-		$a=new ActionComm($db);
-		return $a->fetch($this->fk_action);
+		$this->action=new ActionComm($db);
+		return $this->action->fetch($this->fk_action);
 		
 	}
 	
