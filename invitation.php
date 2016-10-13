@@ -446,7 +446,7 @@ function _card(&$PDOdb,&$object,$action) {
 		$formCore->end();
 	}
 	
-	_list($PDOdb, $object);
+	$allow_bill = _list($PDOdb, $object);
 	
 	if(!$admin_right) {
 		null;
@@ -546,10 +546,11 @@ function _card(&$PDOdb,&$object,$action) {
 	else{
 		echo '<div class="tabsAction">
 			<a class="butActionDelete" href="?fk_action='.$object->id.'&action=remove_pending">'.$langs->trans('RemoveAllUserInvitationPending').'</a>
-			<a class="butAction" href="?fk_action='.$object->id.'&action=presend">'.$langs->trans('SendInvitationTouser').'</a>
-			<a class="butAction" href="?fk_action='.$object->id.'&action=create_bill">'.$langs->trans('CreateBillConfirmed').'</a>
-			<a class="butAction" href="?fk_action='.$object->id.'&action=create_bill&type=present">'.$langs->trans('CreateBillPresent').'</a>
-		</div>';
+			<a class="butAction" href="?fk_action='.$object->id.'&action=presend">'.$langs->trans('SendInvitationTouser').'</a>';
+			
+		if($allow_bill)echo '<a class="butAction" href="?fk_action='.$object->id.'&action=create_bill">'.$langs->trans('CreateBillConfirmed').'</a>
+			<a class="butAction" href="?fk_action='.$object->id.'&action=create_bill&type=present">'.$langs->trans('CreateBillPresent').'</a>';
+		echo '</div>';
 		
 		
 	}
@@ -576,10 +577,15 @@ function _list(&$PDOdb, $object){
 	
 	echo '<br /><table class="border" width="100%">';
 	echo '<tr class="entete"><td>'.$langs->trans('User').'</td><td>'.$langs->trans('Statut').'</td><td>'.$langs->trans('AnswerDate').'</td><td>'.$langs->trans('Note').'</td><td>&nbsp;</td></tr>';
+	
+	$allow_bill = false;
+	
 	foreach($Tinvitation as &$inv) {
 		
 		$u=new User($db);
 		$u->fetch($inv->fk_user);
+		
+		if($u->socid>0)$allow_bill = true;
 		
 		echo '<tr><td>'.($admin_right ? $u->getNomUrl(1) : $u->getFullName($langs)).'</td>
 			<td>'.$inv->libStatut(true);
@@ -604,9 +610,11 @@ function _list(&$PDOdb, $object){
 	?>
 	<script>
 		function setStatutInvitation(fk_invitation, statut) {
-			var answer = $("#answer_"+fk_invitation).val();
 			
-			document.location.href="?fk_action=<?php echo $object->id ?>&id=" +fk_invitation+"&action=setStatut&statut="+statut+"&answer="+encodeURIComponent(answer);
+			var url = "?fk_action=<?php echo $object->id ?>&id=" +fk_invitation+"&action=setStatut&statut="+statut;
+			if($("#answer_"+fk_invitation).length>0)url+="&answer="+encodeURIComponent($("#answer_"+fk_invitation).val());
+			
+			document.location.href=url;
 		}
 		
 		
@@ -614,6 +622,8 @@ function _list(&$PDOdb, $object){
 	<?php
 	
 	echo '</table>';
+	
+	return $allow_bill;
 }	
 
 function _header(&$object) {
