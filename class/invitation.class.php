@@ -4,9 +4,8 @@ class TInvitation extends TObjetStd {
 
     function __construct() {
         $this->set_table(MAIN_DB_PREFIX.'invitation');
-        $this->add_champs('fk_action,fk_user',array('type'=>'integer','index'=>true));
-        $this->add_champs('statut', 'type=entier;');
-        $this->add_champs('answer', array('type'=>'string','index'=>true));
+        $this->add_champs('fk_action,fk_user,statut,isBilled',array('type'=>'integer','index'=>true));
+        $this->add_champs('answer', array('type'=>'string'));
 		$this->add_champs('date_validation','type=date;');
        
         $this->_init_vars();
@@ -25,11 +24,15 @@ class TInvitation extends TObjetStd {
 
 		$this->user=new stdClass;
 		$this->user=new stdClass;
+		
+		$this->date_validation = 0;
 	}
-	function setStatut($PDOdb, $statut) {
+	function setStatut($PDOdb, $statut, $answer = '') {
 		
 		global $user,$db,$langs,$conf;
 		
+		$this->date_validation = ($statut != 0 ? time() : 0);
+		$this->answer = $answer;
 		$this->statut = $statut;
 		$this->save($PDOdb);
 		

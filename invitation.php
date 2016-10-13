@@ -32,7 +32,7 @@
 		
 			$invitation=new TInvitation;
 			if($invitation->load($PDOdb, GETPOST('id')) && ($admin_right || $invitation->fk_user = $user->id)) {
-				$invitation->setStatut($PDOdb, GETPOST('statut'));
+				$invitation->setStatut($PDOdb, GETPOST('statut'),GETPOST('answer'));
 				
 			}
 			//setEventMessage($langs->trans('InvitationStatutChanged'));
@@ -572,8 +572,10 @@ function _list(&$PDOdb, $object){
 	
 	if(empty($Tinvitation)) return false;
 	
+	$formCore=new TFormCore;
+	
 	echo '<br /><table class="border" width="100%">';
-	echo '<tr class="entete"><td>'.$langs->trans('User').'</td><td>'.$langs->trans('Statut').'</td><td>&nbsp;</td></tr>';
+	echo '<tr class="entete"><td>'.$langs->trans('User').'</td><td>'.$langs->trans('Statut').'</td><td>'.$langs->trans('AnswerDate').'</td><td>'.$langs->trans('Note').'</td><td>&nbsp;</td></tr>';
 	foreach($Tinvitation as &$inv) {
 		
 		$u=new User($db);
@@ -584,18 +586,32 @@ function _list(&$PDOdb, $object){
 		
 			if($admin_right || $inv->fk_user == $user->id) {
 		
-				if($inv->statut!=0 && $admin_right) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=0">'.img_picto($langs->trans('SetStatutInvitation0'), 'stcomm0.png').'</a>';
-				if($inv->statut!=1) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=1">'.img_picto($langs->trans('SetStatutInvitation1'), 'stcomm2.png').'</a>';
-				if($inv->statut!=2) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=2">'.img_picto($langs->trans('SetStatutInvitation2'), 'stcomm1.png').'</a>';
-				if($inv->statut!=3 && $admin_right) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=3">'.img_picto($langs->trans('SetStatutInvitation3'), 'warning.png').'</a>';
-				if($inv->statut!=4 && $admin_right) echo ' <a href="?fk_action='.$inv->fk_action.'&id='.$inv->getId().'&action=setStatut&statut=4">'.img_picto($langs->trans('SetStatutInvitation4'), 'stcomm3.png').'</a>';
+				if($inv->statut!=0 && $admin_right) echo ' <a href="javascript:setStatutInvitation('.$inv->getId().',0)">'.img_picto($langs->trans('SetStatutInvitation0'), 'stcomm0.png').'</a>';
+				if($inv->statut!=1) echo ' <a href="javascript:setStatutInvitation('.$inv->getId().',1)">'.img_picto($langs->trans('SetStatutInvitation1'), 'stcomm2.png').'</a>';
+				if($inv->statut!=2) echo ' <a href="javascript:setStatutInvitation('.$inv->getId().',2)">'.img_picto($langs->trans('SetStatutInvitation2'), 'stcomm1.png').'</a>';
+				if($inv->statut!=3 && $admin_right) echo ' <a href="javascript:setStatutInvitation('.$inv->getId().',3)">'.img_picto($langs->trans('SetStatutInvitation3'), 'warning.png').'</a>';
+				if($inv->statut!=4 && $admin_right) echo ' <a href="javascript:setStatutInvitation('.$inv->getId().',4)">'.img_picto($langs->trans('SetStatutInvitation4'), 'stcomm3.png').'</a>';
 					
 			}
 			
 		echo '</td>
+			<td>'.$inv->get_date('date_validation').'</td>
+			<td>'.( $inv->fk_user == $user->id ? $formCore->texte('', 'answer_'.$inv->getId(), $inv->answer, 30, 255) : $inv->answer).'</td>
 			<td>'.($admin_right ? '<a href="?fk_action='.$object->id.'&action=deleteinvitation&id='.$inv->getId().'">'.img_delete().'</a>' : '') .'</td>
 		</tr>';
 	}
+	
+	?>
+	<script>
+		function setStatutInvitation(fk_invitation, statut) {
+			var answer = $("#answer_"+fk_invitation).val();
+			
+			document.location.href="?fk_action=<?php echo $object->id ?>&id=" +fk_invitation+"&action=setStatut&statut="+statut+"&answer="+encodeURIComponent(answer);
+		}
+		
+		
+	</script>
+	<?php
 	
 	echo '</table>';
 }	
