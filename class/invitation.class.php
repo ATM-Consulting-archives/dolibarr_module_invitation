@@ -29,6 +29,17 @@ class TInvitation extends TObjetStd {
 		$this->statut = $statut;
 		$this->save($PDOdb);
 		
+		$this->load_action();
+		
+		
+		if($this->statut == 0 || $this->statut == 2 || $this->statut == 3) {
+			
+		}
+		else {
+			
+		}
+		
+		
 	}
 	function libStatut() {
 		
@@ -44,6 +55,14 @@ class TInvitation extends TObjetStd {
 			return $this->load($PDOdb, $obj->rowid);
 		}
 		return false;
+	}
+	
+	function load_action() {
+		global $db,$user,$conf,$langs;
+		dol_include_once('/comm/action/class/actioncomm.class.php');
+		$a=new ActionComm($db);
+		return $a->fetch($this->fk_action);
+		
 	}
 	
 	function load_user() {

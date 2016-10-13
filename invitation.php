@@ -523,9 +523,10 @@ function _card(&$PDOdb,&$object,$action) {
 				$formmail->substit['__CONTACTCIVNAME__'] = $custcontact;
 			}
 		}
-		$link_event = dol_buildpath('/invitation/invitation.php?fk_action=39',1);
+		$link_event = dol_buildpath('/invitation/invitation.php?fk_action='.$object->id,1);
 
-		$formmail->withbody = $object->note.' <br />'. $langs->trans('ViewInvitation').' <a href="'.$link_event.'">'.$link_event.'</a>';
+		if (! empty($conf->global->FCKEDITOR_ENABLE_MAIL))$formmail->withbody = $object->note."<br />". $langs->trans('ViewInvitation').' <a href="'.$link_event.'">'.$link_event.'</a>';
+		else $formmail->withbody = $object->note."\n\n". $langs->trans('ViewInvitation').' '.$link_event;
 
 		// Tableau des parametres complementaires
 		$formmail->param['action'] = 'send';
