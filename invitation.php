@@ -23,6 +23,14 @@
 	
 	switch($action) {
 	
+		case 'create_bill':
+			
+			$mesgs = TInvitation::createBills($PDOdb, $object->id, GETPOST('type'));
+			
+			setEventMessage($mesgs);
+			
+			break;
+	
 		case 'set-product':
 			
 			$object->array_options['options_fk_product'] = (int)GETPOST('fk_product');

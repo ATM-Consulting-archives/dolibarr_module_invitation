@@ -34,3 +34,6 @@ SendInvitationByMail=Envoyer l'invitation par mail aux membres non confirmés
 
 ViewInvitation=Consulter et répondre à l'invitation
 AnswerDate=Date de réponse
+
+BillCreatedForInvitation=Facture créée pour l'utilisateur %s
+BillCreatedForInvitationError=Pas de facture créée pour l'utilisateur %s

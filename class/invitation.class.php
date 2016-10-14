@@ -4,7 +4,7 @@ class TInvitation extends TObjetStd {
 
     function __construct() {
         $this->set_table(MAIN_DB_PREFIX.'invitation');
-        $this->add_champs('fk_action,fk_user,statut,isBilled',array('type'=>'integer','index'=>true));
+        $this->add_champs('fk_action,fk_user,statut,fk_facture',array('type'=>'integer','index'=>true));
         $this->add_champs('answer', array('type'=>'string'));
 		$this->add_champs('date_validation','type=date;');
        
@@ -74,7 +74,10 @@ class TInvitation extends TObjetStd {
 		global $db,$user,$conf,$langs;
 		dol_include_once('/comm/action/class/actioncomm.class.php');
 		$this->action=new ActionComm($db);
-		return $this->action->fetch($this->fk_action);
+		$res = $this->action->fetch( $this->fk_action );
+		$this->action->fetch_optionals();
+		
+		return $res;
 		
 	}
 	
@@ -84,6 +87,86 @@ class TInvitation extends TObjetStd {
 		$this->user=new User($db);
 		return $this->user->fetch($this->fk_user);
 		
+	}
+	
+	function createBill(&$PDOdb) {
+		
+		global $db,$conf,$langs,$user;
+		
+		dol_include_once('/compta/facture/class/facture.class.php');
+		dol_include_once('/product/class/product.class.php');
+		
+		$this->load_user();
+		$this->load_action();
+		
+		if($this->user->socid>0 && $this->action->array_options['options_fk_product']>0) {
+			
+			$product=new Product($db);
+			if($product->fetch( $this->action->array_options['options_fk_product'] )<=0) return -11;
+			
+			$original_entity = $conf->entity;
+				
+			$facture=new Facture($db);
+			$facture->date = time();
+			$facture->socid = $this->user->socid;
+			
+			$conf->entity = $this->user->entity;
+			$res = $facture->create($user);
+			$conf->entity = $original_entity;
+			
+			if($res>0) {
+
+				$facture->addline($this->action->label, $product->price, 1, $product->tva_tx, 0,0, $product->id);
+				$facture->validate($user);
+
+				$this->fk_facture = $facture->id;
+				$this->save($PDOdb);
+				
+				return $facture->id;	
+			}
+			else{
+				
+				return $res;
+				
+			}		
+			
+		}
+		else{
+			return -111;
+		}
+		
+		
+		
+		
+	}
+	
+	static function createBills(&$PDOdb, $fk_action, $type) {
+		global $langs;
+		$sql="SELECT rowid FROM ".MAIN_DB_PREFIX."invitation WHERE fk_action=".$fk_action;
+		$sql.=" AND statut IN (".($type=='present' ? '4' : '3,1,4').")";
+		
+		$Tab = $PDOdb->ExecuteAsArray($sql);
+		
+		$r='';
+		
+		foreach($Tab as $row) {
+			$i=new TInvitation;
+			$i->load($PDOdb, $row->rowid);
+			
+			/*if($i->fk_facture>0) {
+				null; // already billed
+			}
+			else*/ if($i->createBill($PDOdb)>0) {
+				$r.=$langs->trans('BillCreatedForInvitation', $i->user->login);
+			}
+			else{
+				$r.=$langs->trans('BillCreatedForInvitationError', $i->user->login);
+			}
+			
+		}
+		
+		
+		return $r;
 	}
 	
 	static function addUser(&$PDOdb,$fk_action, &$TUser, $default_statut= 0) {
