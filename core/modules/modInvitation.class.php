@@ -254,6 +254,13 @@ class modInvitation extends DolibarrModules
 	{
 		$sql = array();
 		
+		
+		
+		dol_include_once('/core/class/extrafields.class.php');
+        $extrafields=new ExtraFields($this->db);
+		$res =$extrafields->addExtraField("fk_product", "Product", "sellist", 0, $size, "actioncomm", 0, 0, '', array('options'=>array('product:label:rowid::fk_product_type=1'=>NULL)));
+		
+		
 		define('INC_FROM_DOLIBARR',true);
 
 		dol_include_once('/invitation/config.php');

@@ -14,6 +14,7 @@
 	
 	$object = new ActionComm($db);
     $object->fetch($fk_object);
+	$object->fetch_optionals();
 
 	$PDOdb=new TPDOdb;
 
@@ -21,6 +22,15 @@
 	$admin_right = ($fk_user_author == $user->id);
 	
 	switch($action) {
+	
+		case 'set-product':
+			
+			$object->array_options['options_fk_product'] = (int)GETPOST('fk_product');
+			echo $object->insertExtraFields();
+			
+			exit;
+			
+			break;
 		
 		case 'send':
 			
@@ -671,6 +681,31 @@ function _header(&$object) {
 	echo dol_htmlentitiesbr($object->note);
 	echo '</td></tr>';
 
+	echo '<tr><td class="tdtop">'.$langs->trans("Product").'</td><td colspan="3">';
+	dol_include_once('/core/class/extrafields.class.php');
+    $extrafields=new ExtraFields($db);
+	$extrafields->fetch_name_optionals_label('actioncomm');
+	echo $extrafields->showInputField('fk_product', $object->array_options['options_fk_product']);
+	
+	?>
+	<script type="text/javascript">
+		$('#options_fk_product').change(function() {
+			var fk_product = $(this).val();
+			
+			$.ajax({
+				url:'<?php echo dol_buildpath('/invitation/invitation.php',1) ?>'
+				,data:{
+					action:'set-product'
+					,fk_product:fk_product
+					,fk_action:<?php echo $object->id ?>
+				}
+			});
+		});
+	</script>
+	<?php
+	
+	echo '</td></tr>';
+	
 	echo '</table>';
 	
 	
