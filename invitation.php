@@ -598,6 +598,9 @@ function _list(&$PDOdb, $object){
 	
 	$allow_bill = false;
 	
+	dol_include_once('/core/class/html.formfile.class.php');
+	$formfile = new FormFile($db);
+	
 	foreach($Tinvitation as &$inv) {
 		
 		$u=new User($db);
@@ -605,7 +608,14 @@ function _list(&$PDOdb, $object){
 		
 		if($u->socid>0)$allow_bill = true;
 		
-		echo '<tr><td>'.($admin_right ? $u->getNomUrl(1) : $u->getFullName($langs)).'</td>
+		echo '<tr><td>';
+		
+		echo ($admin_right ? $u->getNomUrl(1) : $u->getFullName($langs));
+		if (($inv->fk_facture>0) && ($admin_right || $inv->fk_user == $user->id) ){
+			echo '<a href="'.dol_buildpath('/compta/facture.php?facid='.$inv->fk_facture,1).'">'.img_picto('','object_bill').'</a>';			
+		}
+		
+		echo '</td>
 			<td>'.$inv->libStatut(true);
 		
 			if($admin_right || $inv->fk_user == $user->id) {
