@@ -37,3 +37,6 @@ AnswerDate=Date de réponse
 
 BillCreatedForInvitation=Facture créée pour l'utilisateur %s
 BillCreatedForInvitationError=Pas de facture créée pour l'utilisateur %s
+
+AllowChangeDayBefore=Changement autorisé N jour(s) avant
+VisibilityOtherMember=Visibilité pour les autres inscrits

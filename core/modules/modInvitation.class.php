@@ -260,6 +260,11 @@ class modInvitation extends DolibarrModules
         $extrafields=new ExtraFields($this->db);
 		$res =$extrafields->addExtraField("fk_product", "Product", "sellist", 0, $size, "actioncomm", 0, 0, '', array('options'=>array('product:label:rowid::fk_product_type=1'=>NULL)));
 		
+		$res =$extrafields->addExtraField("visibility_other_member", "VisibilityOtherMember", "select", 0, $size, "actioncomm", 0, 0, '', array('options'=>array(0=>'Hidden', 1=>'Visible')));
+		
+		$res =$extrafields->addExtraField("allow_change_day_before", "AllowChangeDayBefore", "int", 0, $size, "actioncomm");
+		
+		
 		
 		define('INC_FROM_DOLIBARR',true);
 

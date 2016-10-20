@@ -31,9 +31,15 @@
 			
 			break;
 	
-		case 'set-product':
+		case 'set-extrafield':
 			
-			$object->array_options['options_fk_product'] = (int)GETPOST('fk_product');
+			foreach($_REQUEST as $k=>$v) {
+				if(strpos($k, 'options_')===0)  {
+					$object->array_options[$k] = GETPOST($k);
+						
+				}	
+			}
+			
 			echo $object->insertExtraFields();
 			
 			exit;
@@ -601,6 +607,8 @@ function _list(&$PDOdb, $object){
 	dol_include_once('/core/class/html.formfile.class.php');
 	$formfile = new FormFile($db);
 	
+	$allow_user_to_change = (time() < strtotime('-'.(int)$object->array_options['options_allow_change_day_before'].'day', $object->datep ));
+	
 	foreach($Tinvitation as &$inv) {
 		
 		$u=new User($db);
@@ -608,7 +616,11 @@ function _list(&$PDOdb, $object){
 		
 		if($u->socid>0)$allow_bill = true;
 		
+		if($object->array_options['options_visibility_other_member']!=1 && !$admin_right && $inv->fk_user != $user->id) continue;
+		
 		echo '<tr><td>';
+		
+		$user_allow = ($allow_user_to_change && $inv->fk_user == $user->id );
 		
 		echo ($admin_right ? $u->getNomUrl(1) : $u->getFullName($langs));
 		if (($inv->fk_facture>0) && ($admin_right || $inv->fk_user == $user->id) ){
@@ -618,7 +630,7 @@ function _list(&$PDOdb, $object){
 		echo '</td>
 			<td>'.$inv->libStatut(true);
 		
-			if($admin_right || $inv->fk_user == $user->id) {
+			if($admin_right || $user_allow) {
 		
 				if($inv->statut!=0 && $admin_right) echo ' <a href="javascript:setStatutInvitation('.$inv->getId().',0)">'.img_picto($langs->trans('SetStatutInvitation0'), 'stcomm0.png').'</a>';
 				if($inv->statut!=1) echo ' <a href="javascript:setStatutInvitation('.$inv->getId().',1)">'.img_picto($langs->trans('SetStatutInvitation1'), 'stcomm2.png').'</a>';
@@ -630,7 +642,7 @@ function _list(&$PDOdb, $object){
 			
 		echo '</td>
 			<td>'.$inv->get_date('date_validation').'</td>
-			<td>'.( $inv->fk_user == $user->id ? $formCore->texte('', 'answer_'.$inv->getId(), $inv->answer, 30, 255) : $inv->answer).'</td>
+			<td>'.(($user_allow || $admin_right) ? $formCore->texte('', 'answer_'.$inv->getId(), $inv->answer, 30, 255) : $inv->answer).'</td>
 			<td>'.($admin_right ? '<a href="?fk_action='.$object->id.'&action=deleteinvitation&id='.$inv->getId().'">'.img_delete().'</a>' : '') .'</td>
 		</tr>';
 	}
@@ -699,30 +711,66 @@ function _header(&$object) {
 	echo dol_htmlentitiesbr($object->note);
 	echo '</td></tr>';
 
-	echo '<tr><td class="tdtop">'.$langs->trans("Product").'</td><td colspan="3">';
 	dol_include_once('/core/class/extrafields.class.php');
     $extrafields=new ExtraFields($db);
 	$extrafields->fetch_name_optionals_label('actioncomm');
-	echo $extrafields->showInputField('fk_product', $object->array_options['options_fk_product']);
 	
+	if($object->authorid === $user->id) {
+		
+		echo '<tr><td class="tdtop">'.$langs->trans("Product").'</td><td colspan="3">';
+		echo $extrafields->showInputField('fk_product', $object->array_options['options_fk_product']);
+		echo '</td></tr>';
+	
+		echo '<tr><td class="tdtop">'.$langs->trans("AllowChangeDayBefore").'</td><td colspan="3">';
+		echo $extrafields->showInputField('allow_change_day_before', $object->array_options['options_allow_change_day_before']);
+		echo '</td></tr>';
+	
+		echo '<tr><td class="tdtop">'.$langs->trans("VisibilityOtherMember").'</td><td colspan="3">';
+		echo $extrafields->showInputField('visibility_other_member', $object->array_options['options_visibility_other_member']);
+		echo '</td></tr>';
+	
+	}
+	else{
+		echo '<tr><td class="tdtop">'.$langs->trans("Product").'</td><td colspan="3">';
+		
+		dol_include_once('/product/class/product.class.php');
+		$p=new Product($db);
+		$p->fetch($object->array_options['options_fk_product']);
+		echo $p->getNomUrl(1);
+		
+		echo '</td></tr>';
+	
+		echo '<tr><td class="tdtop">'.$langs->trans("AllowChangeDayBefore").'</td><td colspan="3">';
+		echo $extrafields->showOutputField('allow_change_day_before', $object->array_options['options_allow_change_day_before']);
+		echo '</td></tr>';
+	
+		echo '<tr><td class="tdtop">'.$langs->trans("VisibilityOtherMember").'</td><td colspan="3">';
+		echo $extrafields->showOutputField('visibility_other_member', $object->array_options['options_visibility_other_member']);
+		echo '</td></tr>';
+
+	}
+
 	?>
 	<script type="text/javascript">
-		$('#options_fk_product').change(function() {
-			var fk_product = $(this).val();
+	
+		$('#options_fk_product,input[name=options_allow_change_day_before],#options_visibility_other_member').change(function() {
+			var options_fk_product = $('#options_fk_product').val();
+			var options_allow_change_day_before = $('input[name=options_allow_change_day_before]').val();
+			var options_visibility_other_member = $('#options_visibility_other_member').val();
 			
 			$.ajax({
 				url:'<?php echo dol_buildpath('/invitation/invitation.php',1) ?>'
 				,data:{
-					action:'set-product'
-					,fk_product:fk_product
+					action:'set-extrafield'
+					,options_fk_product:options_fk_product
+					,options_allow_change_day_before:options_allow_change_day_before
+					,options_visibility_other_member:options_visibility_other_member
 					,fk_action:<?php echo $object->id ?>
 				}
 			});
 		});
 	</script>
 	<?php
-	
-	echo '</td></tr>';
 	
 	echo '</table>';
 	
