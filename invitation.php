@@ -554,7 +554,7 @@ function _card(&$PDOdb,&$object,$action) {
 
 		// Tableau des parametres complementaires
 		$formmail->param['action'] = 'send';
-		$formmail->param['models'] = '';
+		$formmail->param['models'] = 'invitation_send';
 		$formmail->param['models_id']=GETPOST('modelmailselected','int');
 		$formmail->param['id'] = $object->id;
 		$formmail->param['returnurl'] = $_SERVER["PHP_SELF"] . '?fk_action=' . $object->id;

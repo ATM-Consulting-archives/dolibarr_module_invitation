@@ -17,4 +17,15 @@ $PDOdb=new TPDOdb;
 
 $o=new TInvitation($db);
 $o->init_db_by_vars($PDOdb);
-
+/*
+$resultset = $db->query("SELECT rowid FROM ".MAIN_DB_PREFIX."c_email_templates WHERE type_template='invitation_send'");
+if($obj = $db->fetch_object($resultset)) {
+	null;
+}
+else{
+	$db->query("INSERT INTO ".MAIN_DB_PREFIX."c_email_templates(entity,module,label,content)
+			VALUES (".$conf->entity.",'invitation_send','')");
+	
+}
+ * TODO model de mail invitation ?
+*/
