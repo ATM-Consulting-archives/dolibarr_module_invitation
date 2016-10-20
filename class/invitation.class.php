@@ -23,10 +23,22 @@ class TInvitation extends TObjetStd {
 		);
 
 		$this->user=new stdClass;
-		$this->user=new stdClass;
+		$this->action=new stdClass;
 		
 		$this->date_validation = 0;
 	}
+	
+	function reinit() {
+		$this->{OBJETSTD_MASTERKEY}=0; 
+		$this->{OBJETSTD_DATECREATE}=time();
+		$this->{OBJETSTD_DATEUPDATE}=time();
+		
+		$this->date_validation = 0;
+		$this->statut = 0;
+		$this->answer = '';
+		$this->fk_facture = 0;
+	}
+	
 	function setStatut($PDOdb, $statut, $answer = '') {
 		
 		global $user,$db,$langs,$conf;
@@ -209,6 +221,19 @@ class TInvitation extends TObjetStd {
 			
 		}
 		return $TInvitation;		
+	}
+	
+	static function duplicateAllToAction(&$PDOdb, $fk_action_from, $fk_action_to) {
+		
+		$TInvitation = self::getAllForAction($PDOdb, $fk_action_from);
+		foreach($TInvitation as &$i) {
+			
+			$i->reinit();
+			$i->fk_action = $fk_action_to;
+			$i->save($PDOdb);
+			
+		}
+		
 	}
 	
 	static function getAllForAction(&$PDOdb, $fk_action) {
