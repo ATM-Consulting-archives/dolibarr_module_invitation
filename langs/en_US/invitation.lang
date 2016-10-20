@@ -5,3 +5,41 @@ ATMAbout = This module has been developed by <a href="http://www.atm-consulting.
 
 InvitationSetup = Invitation module setup
 InvitationAbout = About Invitation
+
+
+RemoveAllUserInvitationPending=Remove not confirmed
+SendInvitationTouser=Send invitation by mail
+CreateBillConfirmed=Create bill for confirmed
+CreateBillPresent=Create bill for presents
+
+RemovePendingInvitationDone=Not confirmed removed
+RemoveInvitationDone=Invitation deleted
+InvitationStatutChanged=Invitation statut updated
+
+UserAdded=People added
+
+PendingInvitation=Pending
+InvitationConfirmed=Confirmed
+InvitationWontCome=Won't come
+InvitationWasntPresent=Don't come
+InvitationPresent=Present
+
+SetStatutInvitation0=Set to pending statut
+SetStatutInvitation1=Set to confirmed statut
+SetStatutInvitation2=Set to won't come statut
+SetStatutInvitation3=Set to don't come statut
+SetStatutInvitation4=Set to present statut
+
+AddUserOrGroupUser=Add a member or group
+SendInvitationByMail=Send invitation by mail to pending invited
+
+ViewInvitation=Show and answer to invitation
+AnswerDate=Answer date
+
+BillCreatedForInvitation=Bill created for user %s
+BillCreatedForInvitationError=No bill create for user %s
+
+AllowChangeDayBefore=Delay in days allowed to made change
+VisibilityOtherMember=Visibility to other member
+
+NbPlace=Number of place

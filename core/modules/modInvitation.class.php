@@ -263,6 +263,7 @@ class modInvitation extends DolibarrModules
 		$res =$extrafields->addExtraField("visibility_other_member", "VisibilityOtherMember", "select", 0, $size, "actioncomm", 0, 0, '', array('options'=>array(0=>'Hidden', 1=>'Visible')));
 		
 		$res =$extrafields->addExtraField("allow_change_day_before", "AllowChangeDayBefore", "int", 0, $size, "actioncomm");
+		//$res =$extrafields->addExtraField("nb_place", "NbPlace", "int", 0, $size, "actioncomm");
 		
 		
 		

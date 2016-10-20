@@ -599,8 +599,8 @@ function _list(&$PDOdb, $object){
 	
 	$formCore=new TFormCore;
 	
-	echo '<br /><table class="border" width="100%">';
-	echo '<tr class="entete"><td>'.$langs->trans('User').'</td><td>'.$langs->trans('Statut').'</td><td>'.$langs->trans('AnswerDate').'</td><td>'.$langs->trans('Note').'</td><td>&nbsp;</td></tr>';
+	echo '<br /><table class="liste" width="100%">';
+	echo '<tr class="liste_titre"><td>'.$langs->trans('User').'</td><td>'.$langs->trans('Statut').'</td><td>'.$langs->trans('AnswerDate').'</td><td>'.$langs->trans('Note').'</td><td>&nbsp;</td></tr>';
 	
 	$allow_bill = false;
 	
@@ -609,10 +609,13 @@ function _list(&$PDOdb, $object){
 	
 	$allow_user_to_change = (time() < strtotime('-'.(int)$object->array_options['options_allow_change_day_before'].'day', $object->datep ));
 	
+	$TTotal =array(0,0,0,0,0);
 	foreach($Tinvitation as &$inv) {
 		
 		$u=new User($db);
 		$u->fetch($inv->fk_user);
+		
+		$TTotal[$inv->statut] ++;
 		
 		if($u->socid>0)$allow_bill = true;
 		
@@ -645,6 +648,17 @@ function _list(&$PDOdb, $object){
 			<td>'.(($user_allow || $admin_right) ? $formCore->texte('', 'answer_'.$inv->getId(), $inv->answer, 30, 255) : $inv->answer).'</td>
 			<td>'.($admin_right ? '<a href="?fk_action='.$object->id.'&action=deleteinvitation&id='.$inv->getId().'">'.img_delete().'</a>' : '') .'</td>
 		</tr>';
+	}
+	
+	if($admin_right) {
+		$inv_static=new TInvitation;
+		echo '<tr class="liste_total">
+			<td>'.$inv_static->TStatut[0].' : '.$TTotal[0].'</td>
+			<td>'.$inv_static->TStatut[1].' : '.$TTotal[1].'</td>
+			<td>'.$inv_static->TStatut[2].' : '.$TTotal[2].'</td>
+			<td colspan="2">&nbsp</td>
+		</tr>';
+		
 	}
 	
 	?>
