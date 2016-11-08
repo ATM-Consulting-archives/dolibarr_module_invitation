@@ -567,7 +567,7 @@ function _card(&$PDOdb,&$object,$action) {
 		print $formmail->get_form();
 
 	}
-	else{
+	elseif($object->array_options['options_fk_product']>0) {
 		echo '<div class="tabsAction">
 			<a class="butActionDelete" href="?fk_action='.$object->id.'&action=remove_pending">'.$langs->trans('RemoveAllUserInvitationPending').'</a>
 			<a class="butAction" href="?fk_action='.$object->id.'&action=presend">'.$langs->trans('SendInvitationTouser').'</a>';
@@ -733,6 +733,9 @@ function _header(&$object) {
 		
 		echo '<tr><td class="tdtop">'.$langs->trans("Product").'</td><td colspan="3">';
 		echo $extrafields->showInputField('fk_product', $object->array_options['options_fk_product']);
+		if(empty($object->array_options['options_fk_product'])) {
+			echo img_warning($langs->trans('InvitationMustHaveProductLinked'));
+		}
 		echo '</td></tr>';
 	
 		echo '<tr><td class="tdtop">'.$langs->trans("AllowChangeDayBefore").'</td><td colspan="3">';
@@ -749,9 +752,12 @@ function _header(&$object) {
 		
 		dol_include_once('/product/class/product.class.php');
 		$p=new Product($db);
-		$p->fetch($object->array_options['options_fk_product']);
-		echo $p->getNomUrl(1);
-		
+		if($object->array_options['options_fk_product']>0 && $p->fetch($object->array_options['options_fk_product'])>0) {
+			echo $p->getNomUrl(1);
+		}
+		else{
+			echo img_warning().' '.$langs->trans('InvitationMustHaveProductLinked');	
+		}
 		echo '</td></tr>';
 	
 		echo '<tr><td class="tdtop">'.$langs->trans("AllowChangeDayBefore").'</td><td colspan="3">';

@@ -43,3 +43,5 @@ AllowChangeDayBefore=Delay in days allowed to made change
 VisibilityOtherMember=Visibility to other member
 
 NbPlace=Number of place
+
+InvitationMustHaveProductLinked=Service must be linked to invitation

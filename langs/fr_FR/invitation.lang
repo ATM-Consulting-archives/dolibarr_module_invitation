@@ -42,3 +42,5 @@ AllowChangeDayBefore=Changement autorisé N jour(s) avant
 VisibilityOtherMember=Visibilité pour les autres inscrits
 
 NbPlace=Nombre de place
+
+InvitationMustHaveProductLinked=L'invitation doit avoir un service lié
